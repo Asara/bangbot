@@ -61,13 +61,14 @@ while True:
     if data.find('!help' or '!Help') != -1:
         irc.send('PRIVMSG ' + channel + ' :All commands begin with ! and are as follows: '
                                         '!ask (Responds yes or no), !8ball (Responds as an 8ball), '
-                                        '!dice (Responds with the requested number of rolled die)'
+                                        '!dice (Responds with the requested number of rolled die), '
+                                        '!flip (Flips a coin for you), '
                                         'and !rr (Allows you to play Russian Roulette)\r\n')
 
 
     # Ask yes or no
     def ask():
-        ask_responses = ['Yes', 'No']
+        ask_responses = ['Yes.', 'No.']
         irc.send('PRIVMSG ' + channel + ' :' + choice(ask_responses) + '\r\n')
 
     # Magic 8ball responses
@@ -102,6 +103,14 @@ while True:
         else:
             count += 1
 
+    # Flip a coin
+    def flip():
+        flip_responses = ['Heads', 'Tails']
+        irc.send('PRIVMSG ' + channel + ' :' + choice(flip_responses) + '\r\n')
+
+
+
+
     # Roll up to 6 dice
     def roll(x):
         if x is None or ' ':
@@ -129,7 +138,11 @@ while True:
     if data.find('!rr' or '!russianRoulette') != -1:
         russianRoulette()
 
+    if data.find('!flip') != -1:
+        flip()
+    
     if data.find('!dice') != -1:
         t = data.split(':!dice')
         dice = t[1].rstrip()
         roll(dice)
+
