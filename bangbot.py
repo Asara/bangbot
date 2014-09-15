@@ -5,10 +5,10 @@ from random import randint
 from time import sleep
 
 # Settings
-network = 'chat.freenode.net'  
-channel = ''
-nick = 'bangbot'
-password = ''
+network = 
+channel = 
+nick = 
+password = 
 port = 6667
 
 
@@ -61,7 +61,7 @@ while True:
     if data.find('!help' or '!Help') != -1:
         irc.send('PRIVMSG ' + channel + ' :All commands begin with ! and are as follows: '
                                         '!ask (Responds yes or no), !8ball (Responds as an 8ball), '
-                                        '!roll (Responds with the requested number of rolled die'
+                                        '!roll (Responds with the requested number of rolled die)'
                                         'and !rr (Allows you to play Russian Roulette)\r\n')
 
 
