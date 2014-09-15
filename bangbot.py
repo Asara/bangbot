@@ -8,7 +8,7 @@ from time import sleep
 network = 
 channel = 
 nick = 
-password =
+password = 
 port = 6667
 
 
@@ -20,7 +20,7 @@ irc.connect((network, port))
 
 # Login to server
 irc.send('NICK ' + nick + '\r\n')
-irc.send('USER ' + nick + ' ' + nick + ' ' + nick + ' ' + ':zotbot a simple IRC Bot\r\n')
+irc.send('USER ' + nick + ' ' + nick + ' ' + nick + ' ' + ':bangbot a simple IRC Bot\r\n')
 irc.send('PRIVMSG ' + 'NICKSERV :identify ' + password + '\r\n')
 
 sleep(20)
@@ -53,7 +53,7 @@ while True:
 
     # Tells the bot to quit the channel
     if data.find('!botquit') != -1:
-        irc.send('PRIVMSG ' + channel + ' : ' + nick + ' out!\r\n')
+        irc.send('PRIVMSG ' + channel + ' :' + nick + ' out!\r\n')
         irc.send('QUIT\r\n')
         quit()
 
@@ -61,7 +61,7 @@ while True:
     if data.find('!help' or '!Help') != -1:
         irc.send('PRIVMSG ' + channel + ' :All commands begin with ! and are as follows: '
                                         '!ask (Responds yes or no), !8ball (Responds as an 8ball), '
-                                        '!roll (Responds with the requested number of rolled die)'
+                                        '!dice (Responds with the requested number of rolled die)'
                                         'and !rr (Allows you to play Russian Roulette)\r\n')
 
 
@@ -104,6 +104,8 @@ while True:
 
     # Roll up to 6 dice
     def roll(x):
+        if x is None or ' ':
+            x = 1
         x = int(x)
         if x > 6:
             irc.send('PRIVMSG ' + channel + ' :Please ask for less than 6 die at a time.\r\n')
@@ -127,10 +129,7 @@ while True:
     if data.find('!rr' or '!russianRoulette') != -1:
         russianRoulette()
 
-    if data.find('!roll') != -1:
-        t = data.split(':!roll')
+    if data.find('!dice') != -1:
+        t = data.split(':!dice')
         dice = t[1].rstrip()
-        if dice is None:
-            dice = 1
         roll(dice)
-
