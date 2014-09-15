@@ -8,7 +8,7 @@ from time import sleep
 network = 
 channel = 
 nick = 
-password = 
+password =
 port = 6667
 
 
@@ -130,5 +130,7 @@ while True:
     if data.find('!roll') != -1:
         t = data.split(':!roll')
         dice = t[1].rstrip()
+        if dice is None:
+            dice = 1
         roll(dice)
 
