@@ -8,7 +8,7 @@ from time import sleep
 network = 
 channel = 
 nick = 
-password = 
+password =
 port = 6667
 
 
@@ -37,6 +37,7 @@ count = randint(0, 5)
 
 # While connected
 while True:
+  try:
     # Buffer
     data = irc.recv(1024)
 
@@ -113,20 +114,21 @@ while True:
 
     # Roll up to 6 dice
     def roll(x):
-        if x is None or ' ':
-            x = 1
-        x = int(x)
-        if x > 6:
-            irc.send('PRIVMSG ' + channel + ' :Please ask for less than 6 die at a time.\r\n')
-        elif x <= 0:
-            irc.send('PRIVMSG ' + channel + ' :Give me a number of die to roll\r\n')
-        else:
-           r = []
-           for i in range(0,x):
-                r.append(str(randint(1,6)))
-                dicelist = ' '.join(r)
-           irc.send('PRIVMSG ' + channel + ' :' + dicelist +'\r\n')
-             
+        try:
+            x = int(x)
+            if x > 6:
+                irc.send('PRIVMSG ' + channel + ' :Please ask for less than 6 die at a time.\r\n')
+            elif x <= 0:
+                irc.send('PRIVMSG ' + channel + ' :Give me a number of die to roll\r\n')
+            else:
+                r = []
+                for i in range(0,x):
+                    r.append(str(randint(1,6)))
+                    dicelist = ' '.join(r)
+                irc.send('PRIVMSG ' + channel + ' :' + dicelist +'\r\n')
+
+        except ValueError:
+            irc.send('PRIVMSG ' + channel + ' :' + str(randint(1,6)) + '\r\n')
 
 # Getters
     if data.find('!ask' or '!a') != -1:
@@ -142,7 +144,11 @@ while True:
         flip()
     
     if data.find('!dice') != -1:
-        t = data.split(':!dice')
-        dice = t[1].rstrip()
+        t = data.split(':!dice ')
+        dice = t[1].strip()
         roll(dice)
 
+  except KeyboardInterrupt:
+    irc.send('PRIVMSG ' + channel + ' :' + nick + ' out!\r\n')
+    irc.send('QUIT\r\n')
+    quit()
