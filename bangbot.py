@@ -62,7 +62,7 @@ while True:
     if data.find('!help' or '!Help') != -1:
         irc.send('PRIVMSG ' + channel + ' :All commands begin with ! and are as follows: '
                                         '!ask (Responds yes or no), !8ball (Responds as an 8ball), '
-                                        '!dice (Responds with the requested number of rolled die), '
+                                        '!dice (Responds with the requested number of rolled dice), '
                                         '!flip (Flips a coin for you), '
                                         'and !rr (Allows you to play Russian Roulette)\r\n')
 
