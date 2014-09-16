@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import socket
-from random import randint
+from random import randint, choice
 from time import sleep
 
 # Settings
