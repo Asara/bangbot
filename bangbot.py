@@ -144,7 +144,7 @@ while True:
         flip()
     
     if data.find('!dice') != -1:
-        t = data.split(':!dice ')
+        t = data.split(':!dice')
         dice = t[1].strip()
         roll(dice)
 
