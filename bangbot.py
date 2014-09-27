@@ -2,8 +2,6 @@
 
 import socket
 from random import randint, choice
-from time import sleep
-from datetime import datetime
 
 # Settings
 network =
