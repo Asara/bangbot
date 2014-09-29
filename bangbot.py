@@ -6,9 +6,28 @@ from random import randint, choice
 
 class BangBot(object):
 
-    def __init__(self, server_config=None, logfile=None, network=None, channel=None, nick="bangbot", password=None, port=6667):
-        config = ConfigParser.RawConfigParser()
-        config.read(server_config)
+    def __init__(self, profile="default", server_config=None, logfile=None, network=None, channel=None, nick="bangbot", password=None, port=6667):
+        if server_config:
+            config = ConfigParser.RawConfigParser()
+            config.read(server_config)
+
+            config__keys_needed = [
+                    'profile',
+                    'logfile',
+                    'network',
+                    'channel',
+                    'nick',
+                    'password',
+                    'port',
+                    ]
+
+            for config_key in config_keys_needed:
+                try:
+                    value = config.get(profile, config_key)
+                    setattr(self, config_key, value)
+                except ConfigParser.NoOptionError as e:
+                    print "You forget to specify the {}".format(e.key)
+
 
 
 
