@@ -25,23 +25,23 @@ class IRCRoom(object):
         else:
             self.nick = nick
             self.password = password
-            self.room.send('NICK {} \r\n'.format(self.nick))
-            self.room.send('USER {0} {0} {0}:bangbot a simple IRC Bot\r\n'.format(self.nick))
+            self.sendraw('NICK {} \r\n'.format(self.nick))
+            self.sendraw('USER {0} {0} {0}:bangbot a simple IRC Bot\r\n'.format(self.nick))
             self.sendpm(NICKSERV, 'identify {}'.format(self.password))
 
     def join(self, channel):
         self.channel = channel
-        self.room.send('JOIN {} \r\n'.format(self.channel))
-        self.room.send('PRIVMSG {}: {} has arrived!\r\n'.format(self.channel,self.nick))
+        self.sendraw('JOIN {} \r\n'.format(self.channel))
+        self.sendraw('PRIVMSG {}: {} has arrived!\r\n'.format(self.channel,self.nick))
     
    def sendmsg(self, text):
         self.msg = text
-        self.room.send('PRIVMSG {} :{}\r\n'.format(self.channel,self.msg))
+        self.sendraw('PRIVMSG {} :{}\r\n'.format(self.channel,self.msg))
 
     def sendpm(self, user, text):
         self.target = user
         self.msg = text
-        self.room.send('PRIVMSG {} :{}\r\n'.format(self.target, self.msg))
+        self.sendraw('PRIVMSG {} :{}\r\n'.format(self.target, self.msg))
 
     def sendraw(self, text):
         self.msg = text
