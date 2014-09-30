@@ -4,8 +4,65 @@ import socket
 import ConfigParser
 from random import randint, choice
 
-class BangBot(object):
 
+
+"""
+    def say(self, something): pass
+"""
+
+class IRCRoom(object):
+    def __init__(self, network=None, port=6667):
+        if network:
+            self.network = network
+            self.port = port
+            self.room = socket.socket(socket.AF_INET,socket.SOCKET_STREAM)
+            self.room.timeout(255)
+        else:
+            print "Please provide a network"
+            exit()
+
+    def connect(self):
+        self.room.connect((self.network, self.port))
+
+    def identify(self, nick, password):
+        if not nick || if not password:
+            print "Please provide a nick and password"
+            exit()
+        else:
+            self.nick = nick
+            self.password = password
+            self.room.send('NICK {} \r\n'.format(self.nick))
+            self.room.send('USER {0} {0} {0}:bangbot a simple IRC Bot\r\n'.format(self.nick))
+            self.room.send('PRIVMSG ' + 'NICKSERV :identify {}\r\n'.format(self.password))
+
+    def join(self, channel):
+        self.channel = channel
+        self.room.send('JOIN {} \r\n'.format(self.channel))
+        self.room.send('PRIVMSG {}: {} has arrived!\r\n'.format(self.channel,self.nick))
+    
+    def read(self):
+        while True:
+            try:
+                data = self.room.recv(1024)
+                return data
+            except KeyboardInterrupt:
+                self.room.send('PRIVMSG {} :{} out!\r\n'.format(self.channel,self.nick))
+                self.room.send('QUIT\r\n')
+                quit()
+            except socket.error:
+                self.room.close()
+                self.room.connect() 
+                self.room.identify()
+                self.room.join()
+                self.room.recieve()
+
+    def 
+
+class BangBot(object):
+    # Globals Variables
+    beenShot = False
+    count = randint(0, 5)
+ 
     def __init__(self, profile="default", server_config=None, logfile=None, network=None, channel=None, nick="bangbot", password=None, port=6667):
         if server_config:
             config = ConfigParser.RawConfigParser()
@@ -28,39 +85,6 @@ class BangBot(object):
                 except ConfigParser.NoOptionError as e:
                     print "You forget to specify the {}".format(e.key)
 
-
-
-
-
-
-   # Socket
-    def connect(self):
-        global irc
-        irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        irc.settimeout(255)
-        irc.connect((self.network, self.port))
-    
-    
-    # Login to server
-    
-    def identify(self):
-        irc.send('NICK {} \r\n'.format(self.nick))
-        irc.send('USER {0} {0} {0}:bangbot a simple IRC Bot\r\n'.format(self.nick))
-        irc.send('PRIVMSG ' + 'NICKSERV :identify {}\r\n'.format(self.password))
-    
-    
-    # Join Channel
-    def join(self):
-        irc.send('JOIN {} \r\n'.format(self.channel))
-        irc.send('PRIVMSG {}: {} has arrived!\r\n'.format(self.channel,self.nick))
-    
-    
-    
-    # Globals Variables
-    beenShot = False
-    count = randint(0, 5)
-    
-    
     # While connected
     def recieve(self):
         while True:
@@ -183,20 +207,4 @@ class BangBot(object):
                 dice = t[1].strip()
                 roll(dice)
         
-          except KeyboardInterrupt:
-            irc.send('PRIVMSG {} :{} out!\r\n'.format(self.channel,self.nick))
-            irc.send('QUIT\r\n')
-            quit()
-          except socket.error:
-            irc.close()
-            connect() 
-            identify()
-            join()
-            recieve()
-    
-    
-    connect()
-    identify()
-    join()
-    recieve()
-    
+          
