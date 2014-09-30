@@ -4,12 +4,6 @@ import socket
 import ConfigParser
 from random import randint, choice
 
-
-
-"""
-    def say(self, something): pass
-"""
-
 class IRCRoom(object):
     def __init__(self, network=None, port=6667):
         if network:
@@ -33,21 +27,41 @@ class IRCRoom(object):
             self.password = password
             self.room.send('NICK {} \r\n'.format(self.nick))
             self.room.send('USER {0} {0} {0}:bangbot a simple IRC Bot\r\n'.format(self.nick))
-            self.room.send('PRIVMSG ' + 'NICKSERV :identify {}\r\n'.format(self.password))
+            self.sendpm(NICKSERV, 'identify {}'.format(self.password))
 
     def join(self, channel):
         self.channel = channel
         self.room.send('JOIN {} \r\n'.format(self.channel))
         self.room.send('PRIVMSG {}: {} has arrived!\r\n'.format(self.channel,self.nick))
     
+   def sendmsg(self, text):
+        self.msg = text
+        self.room.send('PRIVMSG {} :{}\r\n'.format(self.channel,self.msg))
+
+    def sendpm(self, user, text):
+        self.target = user
+        self.msg = text
+        self.room.send('PRIVMSG {} :{}\r\n'.format(self.target, self.msg))
+
+    def sendraw(self, text):
+        self.msg = text
+        self.room.send(self.msg)
+
     def read(self):
         while True:
             try:
                 data = self.room.recv(1024)
+                # Respond to ping
+                if data.find('PING') != -1:
+                    self.room.sendraw('PONG {}\r\n'.format(data.split()[1]))
+        
+                # Auto rejoins to kicked
+                if data.find('KICK') != -1:
+                    self.room.sendraw('JOIN {}\r\n'.format(self.channel))
                 return data
             except KeyboardInterrupt:
-                self.room.send('PRIVMSG {} :{} out!\r\n'.format(self.channel,self.nick))
-                self.room.send('QUIT\r\n')
+                self.sendmsg('{} out!\r\n'.format(self.nick)
+                self.room.sendraw('QUIT\r\n')
                 quit()
             except socket.error:
                 self.room.close()
@@ -56,7 +70,8 @@ class IRCRoom(object):
                 self.room.join()
                 self.room.recieve()
 
-    def 
+ 
+
 
 class BangBot(object):
     # Globals Variables
@@ -68,7 +83,7 @@ class BangBot(object):
             config = ConfigParser.RawConfigParser()
             config.read(server_config)
 
-            config__keys_needed = [
+            config__room.keys_needed = [
                     'profile',
                     'logfile',
                     'network',
@@ -90,40 +105,30 @@ class BangBot(object):
         while True:
           try:
             # Buffer
-            data = irc.recv(1024)
+            data = room.recv(1024)
         
             # Verbose output
             print data
-        
             
-        
-            # Respond to ping
-            if data.find('PING') != -1:
-                irc.send('PONG {}\r\n'.format(data.split()[1]))
-        
-            # Auto rejoins to kicked
-            if data.find('KICK') != -1:
-                irc.send('JOIN {}\r\n'.format(self.channel))
-        
             # Tells the bot to quit the self.channel
             if data.find('!botquit') != -1:
-                irc.send('PRIVMSG {}:{} out!\r\n'.format(self.channel,self.nick))
-                irc.send('QUIT\r\n')
+                room.sendmsg('{} out'.format(self.nick))
+                room.sendraw('QUIT\r\n')
                 quit()
         
             # Help command
             if data.find('!help') != -1 or data.find('!bot') != -1:
-                irc.send('PRIVMSG ' + self.channel + ' :All commands begin with ! and are as follows: '
-                                                '!ask (Responds yes or no), !8ball (Responds as an 8ball), '
-                                                '!dice (Responds with the requested number of rolled die), '
-                                                '!flip (Flips a coin for you), '
-                                                'and !rr (Allows you to play Russian Roulette)\r\n')
+                room.sendmsg('All commands begin with ! and are as follows: '
+                            '!ask (Responds yes or no), !8ball (Responds as an 8ball), '
+                            '!dice (Responds with the requested number of rolled die), '
+                            '!flip (Flips a coin for you), '
+                            'and !rr (Allows you to play Russian Roulette)')
         
         
             # Ask yes or no
             def ask(self):
                 ask_responses = ['Yes.', 'No.']
-                irc.send('PRIVMSG {}: {}\r\n'.format(self.channel, choice(ask_responses)))
+                room.sendmsg('PRIVMSG {}: {}\r\n'.format(self.channel, choice(ask_responses)))
         
             # Magic 8ball responses
             def eightball(self):
@@ -163,9 +168,6 @@ class BangBot(object):
                 flip_responses = ['Heads', 'Tails']
                 irc.send('PRIVMSG {} :{}\r\n'.format(self.channel,choice(flip_responses)))
         
-        
-        
-        
             # Roll up to 6 dice
             def roll(self,x):
                 try:
@@ -196,8 +198,6 @@ class BangBot(object):
         
             if data.find('!sr' or '!russianRoulette') != -1:
                 semi_roulette()
-        
-        
         
             if data.find('!flip') != -1:
                 flip()
