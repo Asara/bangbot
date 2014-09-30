@@ -1,40 +1,32 @@
 #!/usr/bin/env python
-
 import socket
 import ConfigParser
 from random import randint, choice
 
+
 class IRCRoom(object):
     def __init__(self, network=None, port=6667):
-        if network:
-            self.network = network
-            self.port = port
-            self.room = socket.socket(socket.AF_INET,socket.SOCKET_STREAM)
-            self.room.timeout(255)
-        else:
-            print "Please provide a network"
-            exit()
+        self.network = network
+        self.port = port
+        self.room = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.room.settimeout(250)
 
     def connect(self):
         self.room.connect((self.network, self.port))
 
-    def identify(self, nick, password):
-        if not nick || if not password:
-            print "Please provide a nick and password"
-            exit()
-        else:
-            self.nick = nick
-            self.password = password
-            self.sendraw('NICK {} \r\n'.format(self.nick))
-            self.sendraw('USER {0} {0} {0}:bangbot a simple IRC Bot\r\n'.format(self.nick))
-            self.sendpm(NICKSERV, 'identify {}'.format(self.password))
+    def identify(self, nick="bangbot", password=""):
+       self.nick = nick
+       self.password = password
+       self.sendraw('NICK {} \r\n'.format(self.nick))
+       self.sendraw('USER {0} {0} {0}:bangbot a simple IRC Bot\r\n'.format(self.nick))
+       self.sendpm('NICKSERV', 'identify {}'.format(self.password))
 
     def join(self, channel):
         self.channel = channel
         self.sendraw('JOIN {} \r\n'.format(self.channel))
         self.sendraw('PRIVMSG {}: {} has arrived!\r\n'.format(self.channel,self.nick))
     
-   def sendmsg(self, text):
+    def sendmsg(self, text):
         self.msg = text
         self.sendraw('PRIVMSG {} :{}\r\n'.format(self.channel,self.msg))
 
@@ -46,6 +38,9 @@ class IRCRoom(object):
     def sendraw(self, text):
         self.msg = text
         self.room.send(self.msg)
+
+    def quit(self):
+        self.sendraw('QUIT\r\n')
 
     def read(self):
         while True:
@@ -59,26 +54,36 @@ class IRCRoom(object):
                 if data.find('KICK') != -1:
                     self.room.sendraw('JOIN {}\r\n'.format(self.channel))
                 return data
-            except KeyboardInterrupt:
-                self.sendmsg('{} out!\r\n'.format(self.nick)
-                self.room.sendraw('QUIT\r\n')
-                quit()
             except socket.error:
                 self.room.close()
-                self.room.connect() 
-                self.room.identify()
-                self.room.join()
-                self.room.recieve()
+                self.connect() 
+                self.identify()
+                self.join('#devvul')
+                self.read()
 
  
+if __name__ == "__main__":
+    room = IRCRoom("chat.freenode.net",6667)
+    room.connect()
+    room.identify()
+    room.join('#devvul')
+    room.read()
 
-
+"""
 class BangBot(object):
-    # Globals Variables
     beenShot = False
     count = randint(0, 5)
  
-    def __init__(self, profile="default", server_config=None, logfile=None, network=None, channel=None, nick="bangbot", password=None, port=6667):
+    def __init__(self, profile="default", server_config=None, logfile=None, network=None, channel=None, nick=None, password=None, port=6667):
+        self.profile = profile
+        self.config = server_config
+        self.network = network
+        self.nick = nick
+        self.channel = channel
+        self.password = password
+        self.port = port
+
+
         if server_config:
             config = ConfigParser.RawConfigParser()
             config.read(server_config)
@@ -99,23 +104,26 @@ class BangBot(object):
                     setattr(self, config_key, value)
                 except ConfigParser.NoOptionError as e:
                     print "You forget to specify the {}".format(e.key)
-
+        
     # While connected
     def recieve(self):
         while True:
-          try:
+            try:
             # Buffer
-            data = room.recv(1024)
-        
-            # Verbose output
-            print data
+                data = room.read()
+                print data
             
             # Tells the bot to quit the self.channel
-            if data.find('!botquit') != -1:
-                room.sendmsg('{} out'.format(self.nick))
-                room.sendraw('QUIT\r\n')
-                quit()
-        
+                if data.find('!botquit') != -1:
+                    room.sendmsg('{} out'.format(self.nick))
+                    room.quit()
+                    exit()
+            except KeyboardInterrupt:
+                self.sendmsg('{} out!'.format(self.nick))
+                self.quit()
+                exit()
+
+
             # Help command
             if data.find('!help') != -1 or data.find('!bot') != -1:
                 room.sendmsg('All commands begin with ! and are as follows: '
@@ -139,52 +147,52 @@ class BangBot(object):
                                   'Most likely.', 'Ask again later.', 'My reply is no.', 'Outlook good.',
                                   'Don\'t count on it.']
         
-                irc.send('PRIVMSG :{}\r\n'.format(self.channel,choice(ball_responses)))
+                room.sendmsg('{}'.format(choice(ball_responses)))
         
             # Russian Roulette
             def russian_roulette(self):
                 gun_responses = ['*Click*', '*Click*', '*Click*', '*Click*', '*Click*', '*BANG*']
         
                 # Reload
-                if beenShot:
-                    irc.send('PRIVMSG {} :*Reloading*\r\n'.format(self.channel))
-                    count = randint(0, 5)
-                    beenShot = False
+                if self.beenShot:
+                    room.sendmsg('*Reloading*')
+                    self.count = randint(0, 5)
+                    self.beenShot = False
         
-                irc.send('PRIVMSG {} : {}\r\n'.format(self.channel, gun_responses[count]))
+                room.sendmsg(gun_responses[self.count])
         
                 # Shoot
-                if count == 5:
-                    beenShot = True
+                if self.count == 5:
+                    self.beenShot = True
                 # If blank, click.
                 else:
-                    count += 1
+                    self.count += 1
         
             def semi_roulette(self):
-                irc.send('PRIVMSG {} :ClickClickClickClickClick *BANG!*\r\n'.format(self.channel))
+                room.sendmsg('ClickClickClickClickClick *BANG!*')
         
             # Flip a coin
             def flip(self):
                 flip_responses = ['Heads', 'Tails']
-                irc.send('PRIVMSG {} :{}\r\n'.format(self.channel,choice(flip_responses)))
+                room.sendmsg(choice(flip_responses))
         
             # Roll up to 6 dice
             def roll(self,x):
                 try:
                     x = int(x)
                     if x > 6:
-                        irc.send('PRIVMSG {} :Please ask for less than 6 die at a time.\r\n'.format(self.channel))
+                        room.sendmsg('Please ask for less than 6 die at a time.')
                     elif x <= 0:
-                        irc.send('PRIVMSG {} :Give me a number of die to roll\r\n'.format(self.channel))
+                        room.sendmsg('Give me a number of die to roll')
                     else:
                         r = []
                         for i in range(0,x):
                             r.append(str(randint(1,6)))
                             dicelist = ' '.join(r)
-                        irc.send('PRIVMSG {} :{}\r\n'.format(self.channel,dicelist))
+                        room.sendmsg(dicelist)
         
                 except ValueError:
-                    irc.send('PRIVMSG {} :{} \r\n'.format(self.channel,str(randint(1,6))))
+                    irc.sendmsg(str(randint(1,6)))
         
         # Getters
             if data.find('!ask' or '!a') != -1:
@@ -206,5 +214,6 @@ class BangBot(object):
                 t = data.split(':!dice')
                 dice = t[1].strip()
                 roll(dice)
-        
-          
+"""
+
+
