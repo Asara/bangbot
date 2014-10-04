@@ -4,27 +4,32 @@ import ConfigParser
 from random import randint, choice
 
 
-NETWORK='chat.freenode.net'
-PORT=6667
-NICK='bangbot'
-PASSWORD=''
+network='chat.freenode.net'
+port=6667
+nick='bangbot'
+password=''
 
 
 
 class IRCRoom(object):
-    def __init__(self, network=NETWORK, port=PORT):
+    def __init__(self, network, port=6667):
         self.network = network
         self.port = port
         self.room = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.room.settimeout(250)
+        self.nick=None
 
     def connect(self):
         self.room.connect((self.network, self.port))
 
-    def identify(self, nick='bangbot', password=''):
+    def setnick(self, nick):
+        self.nick = nick
+        self.sendraw('NICK {} \r\n'.format(self.nick))
+
+    def identify(self, nick, password):
        self.nick = nick
        self.password = password
-       self.sendraw('NICK {} \r\n'.format(self.nick))
+       self.setnick()
        self.sendraw('USER {0} {0} {0}:bangbot a simple IRC Bot\r\n'.format(self.nick))
        self.sendpm('NICKSERV', 'identify {}'.format(self.password))
 
@@ -32,7 +37,7 @@ class IRCRoom(object):
         self.channel = channel
         self.sendraw('JOIN {} \r\n'.format(self.channel))
         self.sendraw('PRIVMSG {}: {} has arrived!\r\n'.format(self.channel,self.nick))
-    
+
     def sendmsg(self, text):
         self.msg = text
         self.sendraw('PRIVMSG {} :{}\r\n'.format(self.channel,self.msg))
@@ -56,21 +61,21 @@ class IRCRoom(object):
                 # Respond to ping
                 if data.find('PING') != -1:
                     self.room.sendraw('PONG {}\r\n'.format(data.split()[1]))
-        
+
                 # Auto rejoins to kicked
                 if data.find('KICK') != -1:
                     self.room.sendraw('JOIN {}\r\n'.format(self.channel))
                 return data
             except socket.error:
                 self.room.close()
-                self.connect() 
+                self.connect()
                 self.identify()
                 self.join('#devvul')
                 self.read()
 
- 
+
 if __name__ == '__main__':
-    room = IRCRoom('chat.freenode.net',6667)
+    room = IRCRoom(network)
     room.connect()
     room.identify()
     room.join('#devvul')
@@ -80,8 +85,9 @@ if __name__ == '__main__':
 class BangBot(object):
     beenShot = False
     count = randint(0, 5)
- 
-    def __init__(self, profile='default', server_config=None, logfile=None, network=None, channel=None, nick=None, password=None, port=6667):
+
+    def __init__(self, profile='default', server_config=None, logfile=None,
+    network=None, channel=None, nick=None, password=None, port=6667):
         self.profile = profile
         self.config = server_config
         self.network = network
@@ -111,7 +117,6 @@ class BangBot(object):
                     setattr(self, config_key, value)
                 except ConfigParser.NoOptionError as e:
                     print 'You forget to specify the {}'.format(e.key)
-        
     # While connected
     def recieve(self):
         while True:
@@ -119,8 +124,8 @@ class BangBot(object):
             # Buffer
                 data = room.read()
                 print data
-            
-            # Tells the bot to quit the self.channel
+
+                # Tells the bot to quit the self.channel
                 if data.find('!botquit') != -1:
                     room.sendmsg('{} out'.format(self.nick))
                     room.quit()
@@ -138,13 +143,12 @@ class BangBot(object):
                             '!dice (Responds with the requested number of rolled die), '
                             '!flip (Flips a coin for you), '
                             'and !rr (Allows you to play Russian Roulette)')
-        
-        
+
+
             # Ask yes or no
             def ask(self):
                 ask_responses = ['Yes.', 'No.']
                 room.sendmsg('PRIVMSG {}: {}\r\n'.format(self.channel, choice(ask_responses)))
-        
             # Magic 8ball responses
             def eightball(self):
                 ball_responses = ['Yes.', 'Reply hazy, try again.', 'Without a doubt.', 'My sources say no.',
@@ -153,36 +157,36 @@ class BangBot(object):
                                   'Very doubtful.', 'Yes, definitely.', 'It is certain.', 'Cannot predict now.',
                                   'Most likely.', 'Ask again later.', 'My reply is no.', 'Outlook good.',
                                   'Don\'t count on it.']
-        
+
                 room.sendmsg('{}'.format(choice(ball_responses)))
-        
+
             # Russian Roulette
             def russian_roulette(self):
                 gun_responses = ['*Click*', '*Click*', '*Click*', '*Click*', '*Click*', '*BANG*']
-        
+
                 # Reload
                 if self.beenShot:
                     room.sendmsg('*Reloading*')
                     self.count = randint(0, 5)
                     self.beenShot = False
-        
+
                 room.sendmsg(gun_responses[self.count])
-        
+
                 # Shoot
                 if self.count == 5:
                     self.beenShot = True
                 # If blank, click.
                 else:
                     self.count += 1
-        
+
             def semi_roulette(self):
                 room.sendmsg('ClickClickClickClickClick *BANG!*')
-        
+
             # Flip a coin
             def flip(self):
                 flip_responses = ['Heads', 'Tails']
                 room.sendmsg(choice(flip_responses))
-        
+
             # Roll up to 6 dice
             def roll(self,x):
                 try:
@@ -197,26 +201,26 @@ class BangBot(object):
                             r.append(str(randint(1,6)))
                             dicelist = ' '.join(r)
                         room.sendmsg(dicelist)
-        
+
                 except ValueError:
                     irc.sendmsg(str(randint(1,6)))
-        
+
         # Getters
             if data.find('!ask' or '!a') != -1:
                 ask()
-        
+
             if data.find('!8b' or '!8ball') != -1:
                 eightBall()
-        
+
             if data.find('!rr' or '!russianRoulette') != -1:
                 russian_roulette()
-        
+
             if data.find('!sr' or '!russianRoulette') != -1:
                 semi_roulette()
-        
+
             if data.find('!flip') != -1:
                 flip()
-            
+
             if data.find('!dice') != -1:
                 t = data.split(':!dice')
                 dice = t[1].strip()
