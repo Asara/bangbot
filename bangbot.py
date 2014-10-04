@@ -3,13 +3,9 @@ import socket
 import ConfigParser
 from random import randint, choice
 
-
-network='chat.freenode.net'
-port=6667
-nick='bangbot'
-password=''
-
-
+class NoNick(Exception):
+    def __init__(self, message):
+        super(NoNick, self).__init__(message)
 
 class IRCRoom(object):
     def __init__(self, network, port=6667):
@@ -17,26 +13,40 @@ class IRCRoom(object):
         self.port = port
         self.room = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.room.settimeout(250)
-        self.nick=None
+        self.nickset=False
+        self.nicktouse=None
 
     def connect(self):
         self.room.connect((self.network, self.port))
 
     def setnick(self, nick):
-        self.nick = nick
-        self.sendraw('NICK {} \r\n'.format(self.nick))
+        self.nicknicktouse = nick
+        self.nickset=True
+        self.sendraw('NICK {} \r\n'.format(self.nicktouse))
 
-    def identify(self, nick, password):
-       self.nick = nick
-       self.password = password
-       self.setnick()
-       self.sendraw('USER {0} {0} {0}:bangbot a simple IRC Bot\r\n'.format(self.nick))
-       self.sendpm('NICKSERV', 'identify {}'.format(self.password))
+    def identify(self, nick=None, password=None):
+        if not self.nickset:
+            if nick is None and self.nicktouse is None:
+                raise NoNick('Please specify a nick')
+            if self.nicktouse is None:
+                self.nicktouse = nick
+                self.nickset = True
+                self.setnick(self.nicktouse)
+
+        self.password = password
+        senduser = 'USER {0} {0} {0}:bangbot a simple IRC Bot\r\n'.format(
+            self.nicktouse
+        )
+        self.sendraw(senduser)
+        self.sendpm('NICKSERV', 'identify {}'.format(self.password))
 
     def join(self, channel):
         self.channel = channel
         self.sendraw('JOIN {} \r\n'.format(self.channel))
-        self.sendraw('PRIVMSG {}: {} has arrived!\r\n'.format(self.channel,self.nick))
+        arrival = 'PRIVMSG {}: {} has arrived!\r\n'.format(
+            self.channel,self.nicktouse
+        )
+        self.sendraw(arrival)
 
     def sendmsg(self, text):
         self.msg = text
@@ -53,6 +63,7 @@ class IRCRoom(object):
 
     def quit(self):
         self.sendraw('QUIT\r\n')
+        self.nickset = False
 
     def read(self):
         while True:
@@ -75,9 +86,9 @@ class IRCRoom(object):
 
 
 if __name__ == '__main__':
-    room = IRCRoom(network)
+    room = IRCRoom(network='chat.freenode.net')
     room.connect()
-    room.identify()
+    room.identify('bangbot')
     room.join('#devvul')
     room.read()
 
@@ -138,11 +149,12 @@ class BangBot(object):
 
             # Help command
             if data.find('!help') != -1 or data.find('!bot') != -1:
-                room.sendmsg('All commands begin with ! and are as follows: '
-                            '!ask (Responds yes or no), !8ball (Responds as an 8ball), '
-                            '!dice (Responds with the requested number of rolled die), '
-                            '!flip (Flips a coin for you), '
-                            'and !rr (Allows you to play Russian Roulette)')
+                room.sendmsg(
+                    'All commands begin with ! and are as follows: '
+                    '!ask (Responds yes or no), !8ball (Responds as an 8ball), '
+                    '!dice (Responds with the requested number of rolled die), '
+                    '!flip (Flips a coin for you), '
+                    'and !rr (Allows you to play Russian Roulette)')
 
 
             # Ask yes or no
