@@ -4,8 +4,15 @@ import ConfigParser
 from random import randint, choice
 
 
+NETWORK='chat.freenode.net'
+PORT=6667
+NICK='bangbot'
+PASSWORD=''
+
+
+
 class IRCRoom(object):
-    def __init__(self, network=None, port=6667):
+    def __init__(self, network=NETWORK, port=PORT):
         self.network = network
         self.port = port
         self.room = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -14,7 +21,7 @@ class IRCRoom(object):
     def connect(self):
         self.room.connect((self.network, self.port))
 
-    def identify(self, nick="bangbot", password=""):
+    def identify(self, nick='bangbot', password=''):
        self.nick = nick
        self.password = password
        self.sendraw('NICK {} \r\n'.format(self.nick))
@@ -62,8 +69,8 @@ class IRCRoom(object):
                 self.read()
 
  
-if __name__ == "__main__":
-    room = IRCRoom("chat.freenode.net",6667)
+if __name__ == '__main__':
+    room = IRCRoom('chat.freenode.net',6667)
     room.connect()
     room.identify()
     room.join('#devvul')
@@ -74,7 +81,7 @@ class BangBot(object):
     beenShot = False
     count = randint(0, 5)
  
-    def __init__(self, profile="default", server_config=None, logfile=None, network=None, channel=None, nick=None, password=None, port=6667):
+    def __init__(self, profile='default', server_config=None, logfile=None, network=None, channel=None, nick=None, password=None, port=6667):
         self.profile = profile
         self.config = server_config
         self.network = network
@@ -103,7 +110,7 @@ class BangBot(object):
                     value = config.get(profile, config_key)
                     setattr(self, config_key, value)
                 except ConfigParser.NoOptionError as e:
-                    print "You forget to specify the {}".format(e.key)
+                    print 'You forget to specify the {}'.format(e.key)
         
     # While connected
     def recieve(self):
