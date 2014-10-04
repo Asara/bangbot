@@ -1,102 +1,10 @@
 #!/usr/bin/env python
-import socket
 import ConfigParser
 from random import randint, choice
 
-class NoNick(Exception):
-    def __init__(self, message):
-        super(NoNick, self).__init__(message)
-
-class IRCRoom(object):
-    def __init__(self, network, port=6667):
-        self.network = network
-        self.port = port
-        self.room = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.room.settimeout(250)
-        self.nickset=False
-        self.nicktouse=None
-
-    def connect(self):
-        self.room.connect((self.network, self.port))
-
-    def setnick(self, nick):
-        self.nicknicktouse = nick
-        self.nickset=True
-        self.sendraw('NICK {} \r\n'.format(self.nicktouse))
-
-    def identify(self, nick=None, password=None):
-        if not self.nickset:
-            if nick is None and self.nicktouse is None:
-                raise NoNick('Please specify a nick')
-            if self.nicktouse is None:
-                self.nicktouse = nick
-                self.nickset = True
-                self.setnick(self.nicktouse)
-
-        self.password = password
-        senduser = 'USER {0} {0} {0}:bangbot a simple IRC Bot\r\n'.format(
-            self.nicktouse
-        )
-        self.sendraw(senduser)
-        self.sendpm('NICKSERV', 'identify {}'.format(self.password))
-
-    def join(self, channel):
-        self.channel = channel
-        self.sendraw('JOIN {} \r\n'.format(self.channel))
-        arrival = 'PRIVMSG {}: {} has arrived!\r\n'.format(
-            self.channel,self.nicktouse
-        )
-        self.sendraw(arrival)
-
-    def sendmsg(self, text):
-        self.msg = text
-        self.sendraw('PRIVMSG {} :{}\r\n'.format(self.channel,self.msg))
-
-    def sendpm(self, user, text):
-        self.target = user
-        self.msg = text
-        self.sendraw('PRIVMSG {} :{}\r\n'.format(self.target, self.msg))
-
-    def sendraw(self, text):
-        self.msg = text
-        self.room.send(self.msg)
-
-    def quit(self):
-        self.sendraw('QUIT\r\n')
-        self.nickset = False
-
-    def read(self):
-        while True:
-            try:
-                data = self.room.recv(1024)
-                # Respond to ping
-                if data.find('PING') != -1:
-                    self.room.sendraw('PONG {}\r\n'.format(data.split()[1]))
-
-                # Auto rejoins to kicked
-                if data.find('KICK') != -1:
-                    self.room.sendraw('JOIN {}\r\n'.format(self.channel))
-                return data
-            except socket.error:
-                self.room.close()
-                self.connect()
-                self.identify()
-                self.join('#devvul')
-                self.read()
-
-
-if __name__ == '__main__':
-    room = IRCRoom(network='chat.freenode.net')
-    room.connect()
-    room.identify('bangbot')
-    room.join('#devvul')
-    room.read()
-
-"""
 class BangBot(object):
     beenShot = False
     count = randint(0, 5)
-
     def __init__(self, profile='default', server_config=None, logfile=None,
     network=None, channel=None, nick=None, password=None, port=6667):
         self.profile = profile
@@ -237,6 +145,3 @@ class BangBot(object):
                 t = data.split(':!dice')
                 dice = t[1].strip()
                 roll(dice)
-"""
-
-
