@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import socket
-from time import sleep
 
 class NoNick(Exception):
     def __init__(self, message):
