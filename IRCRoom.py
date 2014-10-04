@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import socket
+from time import sleep
 
 class NoNick(Exception):
     def __init__(self, message):
@@ -22,7 +23,7 @@ class IRCRoom(object):
             raise NoNick('Please specify a nick')
 
         if self.nicktouse is None:
-            self.nicknicktouse = nick
+            self.nicktouse = nick
 
         self.nickset=True
         self.sendraw('NICK {} \r\n'.format(self.nicktouse))
@@ -38,7 +39,11 @@ class IRCRoom(object):
             self.msg
         )
         self.sendraw(senduser)
-        self.sendpm('NICKSERV', 'identify {}'.format(self.password))
+        self.sendpm('NICKSERV', 'identify {} {}'.format(
+            self.nicktouse, 
+            self.password
+            )
+        )
 
     def join(self, channel):
         self.channel = channel
@@ -68,27 +73,26 @@ class IRCRoom(object):
     def read(self):
         while True:
             try:
-                data = self.room.recv(1024)
+                data = self.room.recv(4096)
                 # Respond to ping
                 if data.find('PING') != -1:
-                    self.room.sendraw('PONG {}\r\n'.format(data.split()[1]))
+                    self.sendraw('PONG {}\r\n'.format(data.split()[1]))
 
                 # Auto rejoins to kicked
                 if data.find('KICK') != -1:
-                    self.room.sendraw('JOIN {}\r\n'.format(self.channel))
-                return data
+                    self.sendraw('JOIN {}\r\n'.format(self.channel))
             except socket.error:
                 self.room.close()
                 self.connect()
                 self.identify()
                 self.join('#devvul')
-                self.read()
+                continue
 
 
 if __name__ == '__main__':
     room = IRCRoom(network='chat.freenode.net')
     room.connect()
-    room.identify('bangbot', '', 'Hello')
-    room.join('#devvul')
+    room.identify('', '', 'Hello')
+    room.join('')
     room.sendmsg('I have arrived')
     room.read()
