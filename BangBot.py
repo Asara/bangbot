@@ -143,7 +143,7 @@ class BangBot(object):
                         '!dice (Responds with the requested number of dice), '
                         '!flip (Flips a coin for you), '
                         '!rr (Allows you to play Russian Roulette), '
-                        'and !score (Allows you to check rr score) '
+                        'and !score (Allows you to check !rr score) '
                     )
 
                 # Ask yes or no            # Getters
@@ -153,20 +153,20 @@ class BangBot(object):
                 elif '!8b' in data or '!8ball' in data:
                     self.eightball()
 
+                elif '!dice' in data:
+                    t = data.split(':!dice')
+                    dice = t[1].strip()
+                    self.roll(dice)
+
+                elif '!flip' in data:
+                    self.flip()
+
                 elif '!rr' in data:
                     name = data.split('!')[0].lstrip(':')
                     self.russian_roulette(name)
 
                 elif '!sr' in data:
                     self.semi_roulette()
-
-                elif '!flip' in data:
-                    self.flip()
-
-                elif '!dice' in data:
-                    t = data.split(':!dice')
-                    dice = t[1].strip()
-                    self.roll(dice)
 
                 elif '!score' in data:
                     self.print_score()
