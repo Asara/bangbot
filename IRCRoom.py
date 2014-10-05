@@ -86,4 +86,4 @@ class IRCRoom(object):
                 self.identify()
                 self.join()
                 continue
-        yield data
+            yield data

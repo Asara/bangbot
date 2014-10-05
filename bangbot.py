@@ -50,10 +50,9 @@ class BangBot(object):
 
     # While connected
     def recieve(self):
-        while True:
+        for data in self.room.read():
             try:
             # Buffer
-                data = self.room.read()
                 print data
 
                 # Tells the bot to quit the self.channel
@@ -137,32 +136,30 @@ class BangBot(object):
                 except ValueError:
                     irc.sendmsg(str(randint(1,6)))
 
+            # Getters
+            if data.find('!ask' or '!a') != -1:
+                        ask()
+
+            if data.find('!8b' or '!8ball') != -1:
+                eightBall()
+
+            if data.find('!rr' or '!russianRoulette') != -1:
+                russian_roulette()
+
+            if data.find('!sr' or '!russianRoulette') != -1:
+                semi_roulette()
+
+            if data.find('!flip') != -1:
+                flip()
+
+            if data.find('!dice') != -1:
+                        t = i.split(':!dice')
+                        dice = t[1].strip()
+                        roll(dice)
 
 if __name__ == '__main__':
     bot = BangBot(network='', channel='',
             nick='', password='',
             )
-
     bot.connect()
-
-    while bot.recieve():
-        # Getters
-        if i.find('!ask' or '!a') != -1:
-            ask()
-
-        if i.find('!8b' or '!8ball') != -1:
-            eightBall()
-
-        if i.find('!rr' or '!russianRoulette') != -1:
-            russian_roulette()
-
-        if i.find('!sr' or '!russianRoulette') != -1:
-            semi_roulette()
-
-        if i.find('!flip') != -1:
-            flip()
-
-        if i.find('!dice') != -1:
-            t = i.split(':!dice')
-            dice = t[1].strip()
-            roll(dice)
+    bot.recieve()
