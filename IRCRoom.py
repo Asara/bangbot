@@ -87,4 +87,3 @@ class IRCRoom(object):
                 self.join()
                 continue
             yield data
->>>>>>> parent of 529c297... Working BangBot
