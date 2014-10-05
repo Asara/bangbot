@@ -68,10 +68,7 @@ class BangBot(object):
 
   # Russian Roulette
     def russian_roulette(self, nick):
-        self.gun_responses = [
-            '*Click*', '*Click*', '*Click*',
-            '*Click*', '*Click*', '*BANG*'
-        ]
+        self.gun_responses = ['*Click*'] * 5 + ['*BANG*']
         # Reload
         if self.beenShot:
             self.room.sendmsg('*Reloading*')
