@@ -1,2 +1,2 @@
-.py[c,o]
+*.py[co]
 test.cfg

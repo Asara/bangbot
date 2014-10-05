@@ -1,10 +1,12 @@
 #!/usr/bin/env python
+from IRCRoom import IRCRoom
 import ConfigParser
 from random import randint, choice
 
 class BangBot(object):
     beenShot = False
     count = randint(0, 5)
+
     def __init__(self, profile='default', server_config=None, logfile=None,
     network=None, channel=None, nick=None, password=None, port=6667):
         self.profile = profile
@@ -36,18 +38,28 @@ class BangBot(object):
                     setattr(self, config_key, value)
                 except ConfigParser.NoOptionError as e:
                     print 'You forget to specify the {}'.format(e.key)
+
+
+    def connect(self):
+        self.room = IRCRoom(self.network, self.port)
+        self.room.connect()
+        self.room.identify(self.nick ,self.password, 'I am here!')
+        self.room.join(self.channel)
+        self.room.sendmsg('testing 123')
+
+
     # While connected
     def recieve(self):
         while True:
             try:
             # Buffer
-                data = room.read()
+                data = self.room.read()
                 print data
 
                 # Tells the bot to quit the self.channel
                 if data.find('!botquit') != -1:
-                    room.sendmsg('{} out'.format(self.nick))
-                    room.quit()
+                    self.room.sendmsg('{} out'.format(self.nick))
+                    self.room.quit()
                     exit()
             except KeyboardInterrupt:
                 self.sendmsg('{} out!'.format(self.nick))
@@ -57,7 +69,7 @@ class BangBot(object):
 
             # Help command
             if data.find('!help') != -1 or data.find('!bot') != -1:
-                room.sendmsg(
+                self.room.sendmsg(
                     'All commands begin with ! and are as follows: '
                     '!ask (Responds yes or no), !8ball (Responds as an 8ball), '
                     '!dice (Responds with the requested number of rolled die), '
@@ -68,7 +80,7 @@ class BangBot(object):
             # Ask yes or no
             def ask(self):
                 ask_responses = ['Yes.', 'No.']
-                room.sendmsg('PRIVMSG {}: {}\r\n'.format(self.channel, choice(ask_responses)))
+                self.room.sendmsg('PRIVMSG {}: {}\r\n'.format(self.channel, choice(ask_responses)))
             # Magic 8ball responses
             def eightball(self):
                 ball_responses = ['Yes.', 'Reply hazy, try again.', 'Without a doubt.', 'My sources say no.',
@@ -78,7 +90,7 @@ class BangBot(object):
                                   'Most likely.', 'Ask again later.', 'My reply is no.', 'Outlook good.',
                                   'Don\'t count on it.']
 
-                room.sendmsg('{}'.format(choice(ball_responses)))
+                self.room.sendmsg('{}'.format(choice(ball_responses)))
 
             # Russian Roulette
             def russian_roulette(self):
@@ -86,11 +98,11 @@ class BangBot(object):
 
                 # Reload
                 if self.beenShot:
-                    room.sendmsg('*Reloading*')
+                    self.room.sendmsg('*Reloading*')
                     self.count = randint(0, 5)
                     self.beenShot = False
 
-                room.sendmsg(gun_responses[self.count])
+                self.room.sendmsg(gun_responses[self.count])
 
                 # Shoot
                 if self.count == 5:
@@ -100,48 +112,57 @@ class BangBot(object):
                     self.count += 1
 
             def semi_roulette(self):
-                room.sendmsg('ClickClickClickClickClick *BANG!*')
+                self.room.sendmsg('ClickClickClickClickClick *BANG!*')
 
             # Flip a coin
             def flip(self):
                 flip_responses = ['Heads', 'Tails']
-                room.sendmsg(choice(flip_responses))
+                self.room.sendmsg(choice(flip_responses))
 
             # Roll up to 6 dice
             def roll(self,x):
                 try:
                     x = int(x)
                     if x > 6:
-                        room.sendmsg('Please ask for less than 6 die at a time.')
+                        self.room.sendmsg('Please ask for less than 6 die at a time.')
                     elif x <= 0:
-                        room.sendmsg('Give me a number of die to roll')
+                        self.room.sendmsg('Give me a number of die to roll')
                     else:
                         r = []
                         for i in range(0,x):
                             r.append(str(randint(1,6)))
                             dicelist = ' '.join(r)
-                        room.sendmsg(dicelist)
+                        self.room.sendmsg(dicelist)
 
                 except ValueError:
                     irc.sendmsg(str(randint(1,6)))
 
+
+if __name__ == '__main__':
+    bot = BangBot(network='', channel='',
+            nick='', password='',
+            )
+
+    bot.connect()
+
+    while bot.recieve():
         # Getters
-            if data.find('!ask' or '!a') != -1:
-                ask()
+        if i.find('!ask' or '!a') != -1:
+            ask()
 
-            if data.find('!8b' or '!8ball') != -1:
-                eightBall()
+        if i.find('!8b' or '!8ball') != -1:
+            eightBall()
 
-            if data.find('!rr' or '!russianRoulette') != -1:
-                russian_roulette()
+        if i.find('!rr' or '!russianRoulette') != -1:
+            russian_roulette()
 
-            if data.find('!sr' or '!russianRoulette') != -1:
-                semi_roulette()
+        if i.find('!sr' or '!russianRoulette') != -1:
+            semi_roulette()
 
-            if data.find('!flip') != -1:
-                flip()
+        if i.find('!flip') != -1:
+            flip()
 
-            if data.find('!dice') != -1:
-                t = data.split(':!dice')
-                dice = t[1].strip()
-                roll(dice)
+        if i.find('!dice') != -1:
+            t = i.split(':!dice')
+            dice = t[1].strip()
+            roll(dice)

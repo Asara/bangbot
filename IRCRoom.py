@@ -39,7 +39,7 @@ class IRCRoom(object):
         )
         self.sendraw(senduser)
         self.sendpm('NICKSERV', 'identify {} {}'.format(
-            self.nicktouse, 
+            self.nicktouse,
             self.password
             )
         )
@@ -84,14 +84,6 @@ class IRCRoom(object):
                 self.room.close()
                 self.connect()
                 self.identify()
-                self.join('#devvul')
+                self.join()
                 continue
-
-
-if __name__ == '__main__':
-    room = IRCRoom(network='chat.freenode.net')
-    room.connect()
-    room.identify('', '', 'Hello')
-    room.join('')
-    room.sendmsg('I have arrived')
-    room.read()
+        yield data
