@@ -16,7 +16,8 @@ class BangBot(object):
         self.port = port
         self.beenShot = False
         self.count = randint(0, 5)
-
+        self.wins = {}
+        self.loss = {}
 
         if server_config:
             config = ConfigParser.RawConfigParser()
@@ -66,7 +67,7 @@ class BangBot(object):
         self.room.sendmsg('{}'.format(choice(ball_responses)))
 
   # Russian Roulette
-    def russian_roulette(self):
+    def russian_roulette(self, nick):
         self.gun_responses = [
             '*Click*', '*Click*', '*Click*',
             '*Click*', '*Click*', '*BANG*'
@@ -80,10 +81,18 @@ class BangBot(object):
         if self.count == 5:
             self.beenShot = True
             self.room.sendmsg('*BANG!*')
-            # If blank, click.
+            self.loss[nick] = self.loss.get(nick, 0) + 1
+        # If blank, click.
         else:
             self.count += 1
             self.room.sendmsg('*Click*')
+            self.wins[nick] = self.wins.get(nick, 0) + 1
+
+    def print_score(self):
+        for k,v in self.wins.iteritems():
+            self.room.sendmsg('{} has doged {} bullets'.format(k,v))
+        for k,v in self.loss.iteritems():
+            self.room.sendmsg('{} has died {} times'.format(k,v))
 
     def semi_roulette(self):
         self.room.sendmsg('ClickClickClickClickClick *BANG!*')
@@ -126,35 +135,42 @@ class BangBot(object):
                     exit()
 
                 # Help command
-                if data.find('!help') != -1 or data.find('!bot') != -1:
+                elif data.find('!help') != -1 or data.find('!bot') != -1:
                     self.room.sendmsg(
                         'All commands begin with ! and are as follows: '
                         '!ask (Responds yes or no), '
                         '!8ball (Responds as an 8ball), '
                         '!dice (Responds with the requested number of dice), '
                         '!flip (Flips a coin for you), '
-                        'and !rr (Allows you to play Russian Roulette)')
+                        '!rr (Allows you to play Russian Roulette), '
+                        'and !score (Allows you to check rr score) '
+                    )
 
                 # Ask yes or no            # Getters
-                if data.find('!ask' or '!a') != -1:
+                elif '!ask' in data:
                     self.ask()
 
-                if data.find('!8b' or '!8ball') != -1:
+                elif '!8b' in data or '!8ball' in data:
                     self.eightball()
 
-                if data.find('!rr' or '!russianRoulette') != -1:
-                    self.russian_roulette()
+                elif '!rr' in data:
+                    name = data.split('!')[0].lstrip(':')
+                    self.russian_roulette(name)
 
-                if data.find('!sr' or '!russianRoulette') != -1:
+                elif '!sr' in data:
                     self.semi_roulette()
 
-                if data.find('!flip') != -1:
+                elif '!flip' in data:
                     self.flip()
 
-                if data.find('!dice') != -1:
+                elif '!dice' in data:
                     t = data.split(':!dice')
                     dice = t[1].strip()
                     self.roll(dice)
+
+                elif '!score' in data:
+                    self.print_score()
+
         except KeyboardInterrupt:
             self.room.sendmsg('{} out!'.format(self.nick))
             self.room.quit()
