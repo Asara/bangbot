@@ -92,7 +92,7 @@ class BangBot(object):
         for k,v in self.loss.iteritems():
             self.room.sendmsg('{} has died {} times'.format(k,v))
 
-    def semi_roulette(self):
+    def semi_roulette(self, nick):
         self.room.sendmsg('ClickClickClickClickClick *BANG!*')
         self.loss[nick] = self.loss.get(nick, 0) + 1
 
@@ -165,7 +165,8 @@ class BangBot(object):
                     self.russian_roulette(name)
 
                 elif '!sr' in data:
-                    self.semi_roulette()
+                    name = data.split('!')[0].lstrip(':')
+                    self.semi_roulette(name)
 
                 elif '!score' in data:
                     self.print_score()
