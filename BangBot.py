@@ -94,6 +94,7 @@ class BangBot(object):
 
     def semi_roulette(self):
         self.room.sendmsg('ClickClickClickClickClick *BANG!*')
+        self.loss[nick] = self.loss.get(nick, 0) + 1
 
     # Flip a coin
     def flip(self):
