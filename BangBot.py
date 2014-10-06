@@ -44,7 +44,8 @@ class BangBot(object):
     def connect(self):
         self.room = IRCRoom(self.network, self.port)
         self.room.connect()
-        self.room.identify(self.nick ,self.password,)
+        self.room.setnick(self.nick)
+        self.room.identify(self.password,)
         self.room.join(self.channel)
         self.room.sendmsg('{} has arrived!'.format(self.nick))
 
@@ -175,7 +176,7 @@ class BangBot(object):
 
 
 if __name__ == '__main__':
-    bot = BangBot(network='chat.freenode.net', channel='',
+    bot = BangBot(network='', channel='',
             nick='', password='',
             )
     bot.connect()

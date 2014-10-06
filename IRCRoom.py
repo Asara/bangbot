@@ -18,20 +18,14 @@ class IRCRoom(object):
         self.room.connect((self.network, self.port))
 
     def setnick(self, nick):
-        if nick is None and self.nicktouse is None:
-            raise NoNick('Please specify a nick')
-
-        if self.nicktouse is None:
-            self.nicktouse = nick
-
+        self.nicktouse = nick
         self.nickset=True
         self.sendraw('NICK {} \r\n'.format(self.nicktouse))
 
-    def identify(self, nick=None, password=None, msg=''):
+    def identify(self, password=None, msg='This is a bot'):
+        if self.nickset is False:
+            raise NoNick('Please specify a nick')
         self.msg = msg
-        if not self.nickset:
-            self.setnick(nick)
-
         self.password = password
         senduser = 'USER {0} {0} {0}:{1}\r\n'.format(
             self.nicktouse,
