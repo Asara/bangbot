@@ -127,13 +127,13 @@ class BangBot(object):
                 print data
 
                 # Tells the bot to quit the self.channel
-                if data.find('!botquit') != -1:
+                if '!botquit' in data:
                     self.room.sendmsg('{} out'.format(self.nick))
                     self.room.quit()
                     exit()
 
                 # Help command
-                elif data.find('!help') != -1 or data.find('!bot') != -1:
+                elif '!help' in data or '!bot' in data:
                     self.room.sendmsg(
                         'All commands begin with ! and are as follows: '
                         '!ask (Responds yes or no), '
