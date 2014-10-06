@@ -88,7 +88,7 @@ class BangBot(object):
 
     def print_score(self):
         for k,v in self.wins.iteritems():
-            self.room.sendmsg('{} has doged {} bullets'.format(k,v))
+            self.room.sendmsg('{} has dodged {} bullets'.format(k,v))
         for k,v in self.loss.iteritems():
             self.room.sendmsg('{} has died {} times'.format(k,v))
 
