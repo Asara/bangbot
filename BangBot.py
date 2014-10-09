@@ -44,7 +44,8 @@ class BangBot(object):
     def connect(self):
         self.room = IRCRoom(self.network, self.port)
         self.room.connect()
-        self.room.identify(self.nick ,self.password,)
+        self.room.setnick(self.nick)
+        self.room.identify(self.password,)
         self.room.join(self.channel)
         self.room.sendmsg('{} has arrived!'.format(self.nick))
 
@@ -87,12 +88,13 @@ class BangBot(object):
 
     def print_score(self):
         for k,v in self.wins.iteritems():
-            self.room.sendmsg('{} has doged {} bullets'.format(k,v))
+            self.room.sendmsg('{} has dodged {} bullets'.format(k,v))
         for k,v in self.loss.iteritems():
             self.room.sendmsg('{} has died {} times'.format(k,v))
 
-    def semi_roulette(self):
+    def semi_roulette(self, nick):
         self.room.sendmsg('ClickClickClickClickClick *BANG!*')
+        self.loss[nick] = self.loss.get(nick, 0) + 1
 
     # Flip a coin
     def flip(self):
@@ -126,13 +128,13 @@ class BangBot(object):
                 print data
 
                 # Tells the bot to quit the self.channel
-                if data.find('!botquit') != -1:
+                if '!botquit' in data:
                     self.room.sendmsg('{} out'.format(self.nick))
                     self.room.quit()
                     exit()
 
                 # Help command
-                elif data.find('!help') != -1 or data.find('!bot') != -1:
+                elif '!help' in data or '!bot' in data:
                     self.room.sendmsg(
                         'All commands begin with ! and are as follows: '
                         '!ask (Responds yes or no), '
@@ -163,7 +165,8 @@ class BangBot(object):
                     self.russian_roulette(name)
 
                 elif '!sr' in data:
-                    self.semi_roulette()
+                    name = data.split('!')[0].lstrip(':')
+                    self.semi_roulette(name)
 
                 elif '!score' in data:
                     self.print_score()
@@ -175,7 +178,7 @@ class BangBot(object):
 
 
 if __name__ == '__main__':
-    bot = BangBot(network='chat.freenode.net', channel='',
+    bot = BangBot(network='', channel='',
             nick='', password='',
             )
     bot.connect()
