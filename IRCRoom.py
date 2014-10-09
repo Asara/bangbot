@@ -9,12 +9,16 @@ class IRCRoom(object):
     def __init__(self, network, port=6667):
         self.network = network
         self.port = port
-        self.room = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.room.settimeout(250)
         self.nickset=False
         self.nicktouse=None
 
     def connect(self):
+        try:
+            self.room.close()
+        except:
+            pass
+        self.room = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.room.settimeout(250)
         self.room.connect((self.network, self.port))
 
     def setnick(self, nick):
