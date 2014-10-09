@@ -82,6 +82,6 @@ class IRCRoom(object):
                 self.room.close()
                 self.connect()
                 self.identify()
-                self.join()
+                self.join(self.channel)
                 continue
             yield data
