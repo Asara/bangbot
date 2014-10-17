@@ -1,6 +1,0 @@
-[botnick]
-network = irc.network.com
-channel = #channel
-logfile = /absolute/path/to/file
-password = passwordhere
-port = 6667

@@ -2,6 +2,10 @@
 from IRCRoom import IRCRoom
 import ConfigParser
 from random import randint, choice
+try:
+     from config import *
+except ImportError:
+    pass
 
 class BangBot(object):
 
@@ -177,8 +181,19 @@ class BangBot(object):
 
 
 if __name__ == '__main__':
-    bot = BangBot(network='', channel='',
-            nick='', password='',
+    if botlist:
+        for k,v in botlist.iteritems():
+            k = BangBot(network = v.get('network'), channel = v.get('channel'),
+                        nick = k, password = v.get('password'),
+                        port = v.get('port')
             )
-    bot.connect()
-    bot.recieve()
+            k.connect()
+            k.recieve()
+
+
+    else:
+        bot = BangBot(network, channel,
+            nick, password,
+            )
+        bot.connect()
+        bot.recieve()

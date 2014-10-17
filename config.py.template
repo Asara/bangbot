@@ -1,0 +1,7 @@
+botlist = {
+    'botname':{
+        'network' : 'chat.freenode.net',
+        'channel' : '#channel',
+        'password' : ''
+    },
+}

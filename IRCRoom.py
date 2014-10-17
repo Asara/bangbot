@@ -6,9 +6,12 @@ class NoNick(Exception):
         super(NoNick, self).__init__(message)
 
 class IRCRoom(object):
-    def __init__(self, network, port=6667):
+    def __init__(self, network, port):
         self.network = network
-        self.port = port
+        if port: 
+            self.port = port
+        else:
+            self.port = 6667
         self.nickset=False
         self.nicktouse=None
 
