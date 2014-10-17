@@ -3,14 +3,14 @@ from IRCRoom import IRCRoom
 import ConfigParser
 from random import randint, choice
 from multiprocessing import dummy as multiprocessing
-try:
-     from config import *
-except ImportError:
-    pass
+import sys
 
 class BangBot(object):
 
-    def __init__(self, network=None, channel=None, nick=None, password=None, port=6667):
+    def __init__(self, network, channel=None, nick=None, password=None, port=6667):
+        if network is None:
+            sys.stderr.write('Please provide a network')           
+            exit()
         self.network = network
         self.nick = nick
         self.channel = channel
@@ -155,13 +155,14 @@ class BangBot(object):
         except KeyboardInterrupt:
             self.room.sendmsg('{} out!'.format(self.nick))
             self.room.quit()
-            exit()
+            return
 
 if __name__ == '__main__':
-    if bots:
-        pool = multiprocessing.Pool()
-        pool.map(lambda bot_config: BangBot(**bot_config), bots)
-        pool.close()
-        pool.join()
-    else:
-        sys.stderr.write('Please provide a config.py file')
+    try:
+        from config import *
+    except ImportError:
+        sys.stderr.write('Please provide a config')
+    pool = multiprocessing.Pool()
+    pool.map(lambda bot_config: BangBot(**bot_config), bots)
+    pool.close()
+    pool.join()
