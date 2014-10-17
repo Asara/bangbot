@@ -164,4 +164,4 @@ if __name__ == '__main__':
         pool.close()
         pool.join()
     else:
-        print 'Please give me a config file!'
+        sys.stderr.write('Please provide a config.py file')
