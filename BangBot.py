@@ -112,7 +112,7 @@ class BangBot(object):
                 if '!botquit' in data:
                     self.room.sendmsg('{} out'.format(self.nick))
                     self.room.quit()
-                    exit()
+                    return
 
                 # Help command
                 elif '!help' in data or '!bot' in data:
@@ -161,5 +161,7 @@ if __name__ == '__main__':
     if bots:
         pool = multiprocessing.Pool()
         pool.map(lambda bot_config: BangBot(**bot_config), bots)
+        pool.close()
+        pool.join()
     else:
         print 'Please give me a config file!'

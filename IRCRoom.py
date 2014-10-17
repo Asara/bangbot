@@ -69,6 +69,7 @@ class IRCRoom(object):
     def quit(self):
         self.sendraw('QUIT\r\n')
         self.nickset = False
+        self.room.close()
 
     def read(self):
         while True:
