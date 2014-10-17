@@ -1,15 +1,14 @@
 #!/usr/bin/env python
 from IRCRoom import IRCRoom
-import ConfigParser
 from random import randint, choice
 from multiprocessing import dummy as multiprocessing
-import sys
+from import sys import stderr
 
 class BangBot(object):
 
     def __init__(self, network, channel=None, nick=None, password=None, port=6667):
         if network is None:
-            sys.stderr.write('Please provide a network')           
+            stderr.write('Please provide a network')           
             exit()
         self.network = network
         self.nick = nick
@@ -152,7 +151,7 @@ class BangBot(object):
                 elif '!score' in data:
                     self.print_score()
         except:
-            sys.stderr.write('Connection lost')
+            stderr.write('Connection lost')
 
 
 if __name__ == '__main__':
@@ -169,5 +168,5 @@ if __name__ == '__main__':
         finally:
             pool.join()
     except ImportError:
-        sys.stderr.write('Please provide a config\n')
+        stderr.write('Please provide a config\n')
         quit()
