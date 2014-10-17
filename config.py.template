@@ -1,4 +1,4 @@
-botlist = {
+bots = {
     'botname':{
         'network' : 'chat.freenode.net',
         'channel' : '#channel',

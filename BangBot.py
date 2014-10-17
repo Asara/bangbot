@@ -161,16 +161,16 @@ class BangBot(object):
             exit()
 
 if __name__ == '__main__':
-    if botlist:
+    if bots:
         pool = multiprocessing.Pool()
-        for k,v in botlist.iteritems():
-
+        for k,v in bots.iteritems():
             values = v
-            pool.map(BangBot, values)
+            print values
+            pool.map(BangBot, **values)
             pool.start()
-        else:
-            bot = BangBot(network, channel,
-                            nick, password,
-                        )
-            bot.connect()
-            bot.recieve()
+    else:
+        bot = BangBot(network, channel,
+                        nick, password,
+                   )
+        bot.connect()
+        bot.recieve()
