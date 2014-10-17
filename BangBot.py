@@ -10,10 +10,7 @@ except ImportError:
 
 class BangBot(object):
 
-    def __init__(self, profile='default', server_config=None, logfile=None,
-    network=None, channel=None, nick=None, password=None, port=6667):
-        self.profile = profile
-        self.config = server_config
+    def __init__(self, network=None, channel=None, nick=None, password=None, port=6667):
         self.network = network
         self.nick = nick
         self.channel = channel
@@ -163,14 +160,6 @@ class BangBot(object):
 if __name__ == '__main__':
     if bots:
         pool = multiprocessing.Pool()
-        for k,v in bots.iteritems():
-            values = v
-            print values
-            pool.map(BangBot, **values)
-            pool.start()
+        pool.map(lambda bot_config: BangBot(**bot_config), bots)
     else:
-        bot = BangBot(network, channel,
-                        nick, password,
-                   )
-        bot.connect()
-        bot.recieve()
+        print 'Please give me a config file!'
