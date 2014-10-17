@@ -151,19 +151,17 @@ class BangBot(object):
 
                 elif '!score' in data:
                     self.print_score()
+        except:
+            sys.stderr.write('Connection lost')
 
-        except KeyboardInterrupt:
-            self.room.sendmsg('{} out!'.format(self.nick))
-            self.room.quit()
-            return
 
 if __name__ == '__main__':
     try:
         from config import *
+        pool = multiprocessing.Pool()
+        pool.map(lambda bot_config: BangBot(**bot_config), bots)
+        pool.close()
+        pool.join()
     except ImportError:
         sys.stderr.write('Please provide a config\n')
-        exit()
-    pool = multiprocessing.Pool()
-    pool.map(lambda bot_config: BangBot(**bot_config), bots)
-    pool.close()
-    pool.join()
+        quit()
