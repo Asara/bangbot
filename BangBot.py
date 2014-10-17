@@ -161,7 +161,8 @@ if __name__ == '__main__':
     try:
         from config import *
     except ImportError:
-        sys.stderr.write('Please provide a config')
+        sys.stderr.write('Please provide a config\n')
+        exit()
     pool = multiprocessing.Pool()
     pool.map(lambda bot_config: BangBot(**bot_config), bots)
     pool.close()
