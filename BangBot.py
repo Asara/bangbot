@@ -158,7 +158,9 @@ class BangBot(object):
 if __name__ == '__main__':
     try:
         from config import *
-        pool = multiprocessing.Pool()
+        number_of_bots = len(bots)
+        print number_of_bots
+        pool = multiprocessing.Pool(number_of_bots)
         pool.map(lambda bot_config: BangBot(**bot_config), bots)
         pool.close()
         pool.join()
