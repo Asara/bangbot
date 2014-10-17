@@ -159,11 +159,15 @@ if __name__ == '__main__':
     try:
         from config import *
         number_of_bots = len(bots)
-        print number_of_bots
         pool = multiprocessing.Pool(number_of_bots)
-        pool.map(lambda bot_config: BangBot(**bot_config), bots)
-        pool.close()
-        pool.join()
+        try:
+            pool.map(lambda bot_config: BangBot(**bot_config), bots)
+            pool.close()
+        except KeyboardInterrupt:
+            print 'Got a ^C, quitting'
+            pool.terminate()
+        finally:
+            pool.join()
     except ImportError:
         sys.stderr.write('Please provide a config\n')
         quit()
