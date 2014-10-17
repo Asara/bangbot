@@ -181,14 +181,16 @@ class BangBot(object):
 
 
 if __name__ == '__main__':
+    instances = {}
     if botlist:
         for k,v in botlist.iteritems():
-            k = BangBot(network = v.get('network'), channel = v.get('channel'),
-                        nick = k, password = v.get('password'),
-                        port = v.get('port')
+            instances[k] =  BangBot(network = v.get('network'), 
+                                    channel = v.get('channel'),
+                                    nick = k, password = v.get('password'),
+                                    port = v.get('port')
             )
-            k.connect()
-            k.recieve()
+            instances[k].connect()
+            instances[k].recieve()
 
 
     else:
