@@ -2,6 +2,7 @@
 from IRCRoom import IRCRoom
 import ConfigParser
 from random import randint, choice
+from multiprocessing import dummy as multiprocessing
 try:
      from config import *
 except ImportError:
@@ -22,28 +23,8 @@ class BangBot(object):
         self.count = randint(0, 5)
         self.wins = {}
         self.loss = {}
-
-        if server_config:
-            config = ConfigParser.RawConfigParser()
-            config.read(server_config)
-
-            config__room.keys_needed = [
-                    'profile',
-                    'logfile',
-                    'network',
-                    'channel',
-                    'nick',
-                    'password',
-                    'port',
-                    ]
-
-            for config_key in config_keys_needed:
-                try:
-                    value = config.get(profile, config_key)
-                    setattr(self, config_key, value)
-                except ConfigParser.NoOptionError as e:
-                    print 'You forget to specify the {}'.format(e.key)
-
+        self.connect()
+        self.recieve()
 
     def connect(self):
         self.room = IRCRoom(self.network, self.port)
@@ -179,23 +160,17 @@ class BangBot(object):
             self.room.quit()
             exit()
 
-
 if __name__ == '__main__':
-    instances = {}
     if botlist:
+        pool = multiprocessing.Pool()
         for k,v in botlist.iteritems():
-            instances[k] =  BangBot(network = v.get('network'), 
-                                    channel = v.get('channel'),
-                                    nick = k, password = v.get('password'),
-                                    port = v.get('port')
-            )
-            instances[k].connect()
-            instances[k].recieve()
 
-
-    else:
-        bot = BangBot(network, channel,
-            nick, password,
-            )
-        bot.connect()
-        bot.recieve()
+            values = v
+            pool.map(BangBot, values)
+            pool.start()
+        else:
+            bot = BangBot(network, channel,
+                            nick, password,
+                        )
+            bot.connect()
+            bot.recieve()
