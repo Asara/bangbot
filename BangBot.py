@@ -2,7 +2,7 @@
 from IRCRoom import IRCRoom
 from random import randint, choice
 from multiprocessing import dummy as multiprocessing
-from import sys import stderr
+from sys import stderr
 
 class BangBot(object):
 
