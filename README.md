@@ -1,1 +1,1 @@
-!bot is a silly little irc bot. 
+!bot is a silly little irc bot.

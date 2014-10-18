@@ -8,7 +8,7 @@ class NoNick(Exception):
 class IRCRoom(object):
     def __init__(self, network, port):
         self.network = network
-        if port: 
+        if port:
             self.port = port
         else:
             self.port = 6667

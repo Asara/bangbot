@@ -6,9 +6,10 @@ from sys import stderr
 
 class BangBot(object):
 
-    def __init__(self, network, channel=None, nick=None, password=None, port=6667):
+    def __init__(self, network, channel=None, nick=None,
+                        password=None, port=6667):
         if network is None:
-            stderr.write('Please provide a network')           
+            stderr.write('Please provide a network')
             exit()
         self.network = network
         self.nick = nick
