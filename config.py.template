@@ -1,7 +1,14 @@
-bots = {
-    'botname':{
+bots = [
+    {
+        'nick' : 'botnick',
         'network' : 'chat.freenode.net',
         'channel' : '#channel',
-        'password' : ''
+        'password' : '',
+        'ssl' : True,
     },
-}
+    {
+        'nick' : 'secondbot',
+        'network' : 'chat.freenode.net',
+        'channel' : '#anotherchan',
+        'password' : '',
+]
