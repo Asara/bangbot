@@ -10,8 +10,10 @@ class IRCRoom(object):
         self.network = network
         if ssl is True:
             self.port = 6697
+            self.ssl = True
         else:
             self.port = 6667
+            self.ssl = False
         if port:
             self.port = port
         self.nicktouse=None
@@ -24,7 +26,7 @@ class IRCRoom(object):
             pass
         self.room = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.room.settimeout(250)
-        if ssl is True:
+        if self.ssl is True:
             self.room = ssl.wrap_socket(self.room)
         self.room.connect((self.network, self.port))
 
