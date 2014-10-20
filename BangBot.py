@@ -7,7 +7,7 @@ from sys import stderr
 class BangBot(object):
 
     def __init__(self, network, channel=None, nick=None,
-                        password=None, port=6667):
+                        password=None, port=None, ssl=False):
         if network is None:
             stderr.write('Please provide a network')
             exit()
@@ -15,7 +15,13 @@ class BangBot(object):
         self.nick = nick
         self.channel = channel
         self.password = password
-        self.port = port
+        if ssl is True:
+            self.port = 6697
+            self.ssl = True
+        else:
+            self.port = 6667
+        if port:
+            self.port = port
         self.beenShot = False
         self.count = randint(0, 5)
         self.wins = {}
@@ -24,7 +30,7 @@ class BangBot(object):
         self.recieve()
 
     def connect(self):
-        self.room = IRCRoom(self.network, self.port)
+        self.room = IRCRoom(self.network, self.port, self.ssl)
         self.room.connect()
         self.room.setnick(self.nick)
         self.room.identify(self.password,)
