@@ -167,22 +167,27 @@ def init_worker():
 
 def worker():
     while(True):
-        time.sleep(1)
+        pool.map(lambda bot_config: BangBot(**bot_config), bots)
 
-if __name__ == '__main__':
+def main():
     try:
-        from config import *
+        from config import bots
         number_of_bots = len(bots)
-        pool = multiprocessing.Pool(number_of_bots, init_worker)
-        try:
-            pool.map(lambda bot_config: BangBot(**bot_config), bots)
-            pool.apply_async(worker)
-            pool.close()
-            pool.join()
-        except KeyboardInturrupt:
-            print "Caught ^C, quitting"
-            pool.terminate()
-            pool.join()
     except ImportError:
         stderr.write('Please provide a config\n')
         quit()
+
+    pool = multiprocessing.Pool(number_of_bots, init_worker)
+    for i in number_of_bots:
+        pool.apply_async(worker)
+    pool.close()
+    pool.join()
+    try:
+        sleep(1) 
+    except KeyboardInterrupt:
+        print "Caught ^C, quitting"
+        pool.terminate()
+        pool.join()
+
+if __name__ == '__main__':
+    main()
