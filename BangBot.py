@@ -166,8 +166,7 @@ def init_worker():
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
 def worker():
-    while(True):
-        pool.map(lambda bot_config: BangBot(**bot_config), bots)
+    pool.map(lambda bot_config: BangBot(**bot_config), bots)
 
 def main():
     try:
@@ -176,14 +175,12 @@ def main():
     except ImportError:
         stderr.write('Please provide a config\n')
         quit()
-
     pool = multiprocessing.Pool(number_of_bots, init_worker)
-    for i in range(number_of_bots):
-        pool.apply_async(worker)
-    pool.close()
-    pool.join()
     try:
-        sleep(1) 
+        for i in range(number_of_bots):
+            pool.apply_async(worker)
+            pool.close()
+            pool.join()
     except KeyboardInterrupt:
         print "Caught ^C, quitting"
         pool.terminate()
