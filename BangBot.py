@@ -3,6 +3,7 @@ from IRCRoom import IRCRoom
 from random import randint, choice
 from multiprocessing import dummy as multiprocessing
 from sys import stderr
+import signal
 
 class BangBot(object):
 
@@ -161,14 +162,27 @@ class BangBot(object):
             stderr.write('Connection lost')
 
 
+def init_worker():
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+
+def worker():
+    while(True):
+        time.sleep(1)
+
 if __name__ == '__main__':
     try:
         from config import *
         number_of_bots = len(bots)
-        pool = multiprocessing.Pool(number_of_bots)
-        pool.map(lambda bot_config: BangBot(**bot_config), bots)
-        pool.close()
-        pool.join()
+        pool = multiprocessing.Pool(number_of_bots, init_worker)
+        try:
+            pool.map(lambda bot_config: BangBot(**bot_config), bots)
+            pool.apply_async(worker)
+            pool.close()
+            pool.join()
+        except KeyboardInturrupt:
+            print "Caught ^C, quitting"
+            pool.terminate()
+            pool.join()
     except ImportError:
         stderr.write('Please provide a config\n')
         quit()
