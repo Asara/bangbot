@@ -178,7 +178,7 @@ def main():
         quit()
 
     pool = multiprocessing.Pool(number_of_bots, init_worker)
-    for i in number_of_bots:
+    for i in range(number_of_bots):
         pool.apply_async(worker)
     pool.close()
     pool.join()
