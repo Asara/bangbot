@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 from IRCRoom import IRCRoom
 from random import randint, choice
-from sys import stderr
-from threading import Thread
+from sys import stderr, exit
+from threading import Thread, Event
 
 class BangBot(object):
 
@@ -164,8 +164,10 @@ class BangBot(object):
         except:
             stderr.write('Connection lost')
 
-def worker(config):
+def worker(config, e):
     bot = BangBot(**config)
+    if  e.isSet():
+        bot.quit()
 
 def main():
     try:
@@ -176,14 +178,15 @@ def main():
         exit()
 
     threads = []
+    e = Event()
     for i in range(number_of_bots):
         try:
-            t = Thread(target=worker, args=(bots[i],))
+            t = Thread(target=worker, args=(bots[i],e,))
             threads.append(t)
             t.start()
-            t.join()
         except (KeyboardInterrupt, SystemExit):
             print "Caught ^C, quitting"
+            e.set()
 
 if __name__ == '__main__':
     main()
