@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 from IRCRoom import IRCRoom
 from random import randint, choice
-from multiprocessing import dummy as multiprocessing
 from sys import stderr
-import signal
+from threading import Thread
 
 class BangBot(object):
 
@@ -21,6 +20,7 @@ class BangBot(object):
             self.ssl = True
         else:
             self.port = 6667
+            self.ssl = False
         if port:
             self.port = port
         self.beenShot = False
@@ -89,6 +89,10 @@ class BangBot(object):
         flip_responses = ['Heads', 'Tails']
         self.room.sendmsg(choice(flip_responses))
 
+    def quit(self):
+        self.room.sendmsg('{} out'.format(self.nick))
+        self.room.quit()
+
     # Roll up to 6 dice
     def roll(self,x):
         try:
@@ -117,8 +121,7 @@ class BangBot(object):
 
                 # Tells the bot to quit the self.channel
                 if '!botquit' in data:
-                    self.room.sendmsg('{} out'.format(self.nick))
-                    self.room.quit()
+                    self.quit()
                     return
 
                 # Help command
@@ -161,12 +164,8 @@ class BangBot(object):
         except:
             stderr.write('Connection lost')
 
-
-def init_worker():
-    signal.signal(signal.SIGINT, signal.SIG_IGN)
-
-def worker():
-    pool.map(lambda bot_config: BangBot(**bot_config), bots)
+def worker(config):
+    bot = BangBot(**config)
 
 def main():
     try:
@@ -174,17 +173,17 @@ def main():
         number_of_bots = len(bots)
     except ImportError:
         stderr.write('Please provide a config\n')
-        quit()
-    pool = multiprocessing.Pool(number_of_bots, init_worker)
-    try:
-        for i in range(number_of_bots):
-            pool.apply_async(worker)
-            pool.close()
-            pool.join()
-    except KeyboardInterrupt:
-        print "Caught ^C, quitting"
-        pool.terminate()
-        pool.join()
+        exit()
+
+    threads = []
+    for i in range(number_of_bots):
+        try:
+            t = Thread(target=worker, args=(bots[i],))
+            threads.append(t)
+            t.start()
+            t.join()
+        except (KeyboardInterrupt, SystemExit):
+            print "Caught ^C, quitting"
 
 if __name__ == '__main__':
     main()
