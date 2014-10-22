@@ -165,10 +165,6 @@ class BangBot(object):
         except:
             stderr.write('Connection lost')
 
-#def worker(config):
-#    bot = BangBot(**config)
-
-
 class BotThread(Thread):
     def __init__(self, worker, args):
         super(BotThread, self).__init__()
@@ -176,26 +172,28 @@ class BotThread(Thread):
         self.args = args
 
     def run(self):
-        try:
-            self.worker(**self.args)
-        except (KeyboardInterrupt, SystemExit):
-            print "Caught ^C, quitting"
-            self.worker.quit()
+        self.worker(**self.args)
+        print "Caught ^C, quitting"
+        self.worker.quit()
 
 def main():
     try:
         from config import bots
-        number_of_bots = len(bots)
     except ImportError:
         stderr.write('Please provide a config\n')
         exit()
 
-    threads = []
-    for i in range(number_of_bots):
-        t = BotThread(BangBot, args=bots[i],)
-        threads.append(t)
-        t.start()
-        t.join()
+    threads = [ BotThread(BangBot, args=bot) for bot in bots ]
+
+    def setup_thread(thread):
+        thread.daemon = True
+        thread.start()
+        thread.join(600)
+
+    try:
+        map(setup_thread, threads)
+    except KeyboardInterrupt:
+        exit()
 
 if __name__ == '__main__':
     main()
