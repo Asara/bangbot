@@ -188,7 +188,7 @@ def main():
     def setup_thread(thread):
         thread.daemon = True
         thread.start()
-        thread.join(600)
+        thread.join()
 
     try:
         map(setup_thread, threads)
