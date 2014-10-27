@@ -1,52 +1,38 @@
 #!/usr/bin/env python
 from IRCRoom import IRCRoom
-import ConfigParser
 from random import randint, choice
-try:
-     from config import *
-except ImportError:
-    pass
+from sys import stderr, exit
+from threading import Thread
+import sys
 
 class BangBot(object):
 
-    def __init__(self, profile='default', server_config=None, logfile=None,
-    network=None, channel=None, nick=None, password=None, port=6667):
-        self.profile = profile
-        self.config = server_config
+    def __init__(self, network, channel=None, nick=None,
+                        password=None, port=None, ssl=False):
+        if network is None:
+            stderr.write('Please provide a network')
+            exit()
         self.network = network
         self.nick = nick
         self.channel = channel
         self.password = password
-        self.port = port
+        if ssl is True:
+            self.port = 6697
+            self.ssl = True
+        else:
+            self.port = 6667
+            self.ssl = False
+        if port:
+            self.port = port
         self.beenShot = False
         self.count = randint(0, 5)
         self.wins = {}
         self.loss = {}
-
-        if server_config:
-            config = ConfigParser.RawConfigParser()
-            config.read(server_config)
-
-            config__room.keys_needed = [
-                    'profile',
-                    'logfile',
-                    'network',
-                    'channel',
-                    'nick',
-                    'password',
-                    'port',
-                    ]
-
-            for config_key in config_keys_needed:
-                try:
-                    value = config.get(profile, config_key)
-                    setattr(self, config_key, value)
-                except ConfigParser.NoOptionError as e:
-                    print 'You forget to specify the {}'.format(e.key)
-
+        self.connect()
+        self.recieve()
 
     def connect(self):
-        self.room = IRCRoom(self.network, self.port)
+        self.room = IRCRoom(self.network, self.port, self.ssl)
         self.room.connect()
         self.room.setnick(self.nick)
         self.room.identify(self.password,)
@@ -104,6 +90,10 @@ class BangBot(object):
         flip_responses = ['Heads', 'Tails']
         self.room.sendmsg(choice(flip_responses))
 
+    def quit(self):
+        self.room.sendmsg('{} out'.format(self.nick))
+        self.room.quit()
+
     # Roll up to 6 dice
     def roll(self,x):
         try:
@@ -132,9 +122,8 @@ class BangBot(object):
 
                 # Tells the bot to quit the self.channel
                 if '!botquit' in data:
-                    self.room.sendmsg('{} out'.format(self.nick))
-                    self.room.quit()
-                    exit()
+                    self.quit()
+                    return
 
                 # Help command
                 elif '!help' in data or '!bot' in data:
@@ -173,29 +162,38 @@ class BangBot(object):
 
                 elif '!score' in data:
                     self.print_score()
+        except:
+            stderr.write('Connection lost')
 
-        except KeyboardInterrupt:
-            self.room.sendmsg('{} out!'.format(self.nick))
-            self.room.quit()
-            exit()
+class BotThread(Thread):
+    def __init__(self, worker, args):
+        super(BotThread, self).__init__()
+        self.worker = worker
+        self.args = args
 
+    def run(self):
+        self.worker(**self.args)
+        print "Caught ^C, quitting"
+        self.worker.quit()
+
+def main():
+    try:
+        from config import bots
+    except ImportError:
+        stderr.write('Please provide a config\n')
+        exit()
+
+    threads = [ BotThread(BangBot, args=bot) for bot in bots ]
+
+    def setup_thread(thread):
+        thread.daemon = True
+        thread.start()
+        thread.join()
+
+    try:
+        map(setup_thread, threads)
+    except KeyboardInterrupt:
+        exit()
 
 if __name__ == '__main__':
-    instances = {}
-    if botlist:
-        for k,v in botlist.iteritems():
-            instances[k] =  BangBot(network = v.get('network'), 
-                                    channel = v.get('channel'),
-                                    nick = k, password = v.get('password'),
-                                    port = v.get('port')
-            )
-            instances[k].connect()
-            instances[k].recieve()
-
-
-    else:
-        bot = BangBot(network, channel,
-            nick, password,
-            )
-        bot.connect()
-        bot.recieve()
+    main()

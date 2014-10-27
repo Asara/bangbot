@@ -1,19 +1,23 @@
 #!/usr/bin/env python
-import socket
+import socket, ssl
 
 class NoNick(Exception):
     def __init__(self, message):
         super(NoNick, self).__init__(message)
 
 class IRCRoom(object):
-    def __init__(self, network, port):
+    def __init__(self, network, port=None, ssl=False):
         self.network = network
-        if port: 
-            self.port = port
+        if ssl is True:
+            self.port = 6697
+            self.ssl = True
         else:
             self.port = 6667
-        self.nickset=False
+            self.ssl = False
+        if port:
+            self.port = port
         self.nicktouse=None
+        self.nickset=False
 
     def connect(self):
         try:
@@ -22,6 +26,8 @@ class IRCRoom(object):
             pass
         self.room = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.room.settimeout(250)
+        if self.ssl is True:
+            self.room = ssl.wrap_socket(self.room)
         self.room.connect((self.network, self.port))
 
     def setnick(self, nick):
@@ -69,6 +75,7 @@ class IRCRoom(object):
     def quit(self):
         self.sendraw('QUIT\r\n')
         self.nickset = False
+        self.room.close()
 
     def read(self):
         while True:
